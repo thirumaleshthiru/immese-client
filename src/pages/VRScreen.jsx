@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Phone, Play, Pause, CheckCircle2, Loader2, UserCheck } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Phone, Play, Pause, CheckCircle2, Loader2, UserCheck, Maximize, Minimize } from 'lucide-react';
 import axiosInstance from '../utils/axiosInstance';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../utils/AuthContext';
@@ -15,6 +15,8 @@ const VRVideoPlayer = () => {
   const [hasMarkedPresent, setHasMarkedPresent] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [classData, setClassData] = useState(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const containerRef = useRef(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -38,9 +40,28 @@ const VRVideoPlayer = () => {
     window.addEventListener('orientationchange', checkOrientation);
     window.addEventListener('resize', checkOrientation);
 
+    // Track fullscreen changes
+    const handleFullscreenChange = () => {
+      setIsFullscreen(
+        document.fullscreenElement || 
+        document.webkitFullscreenElement || 
+        document.mozFullScreenElement || 
+        document.msFullscreenElement
+      );
+    };
+    
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+    document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+
     return () => {
       window.removeEventListener('orientationchange', checkOrientation);
       window.removeEventListener('resize', checkOrientation);
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('MSFullscreenChange', handleFullscreenChange);
     };
   }, []);
 
@@ -100,6 +121,38 @@ const VRVideoPlayer = () => {
     }
   };
 
+  const toggleFullscreen = () => {
+    if (!containerRef.current) return;
+    
+    try {
+      if (!isFullscreen) {
+        // Enter fullscreen
+        if (containerRef.current.requestFullscreen) {
+          containerRef.current.requestFullscreen();
+        } else if (containerRef.current.webkitRequestFullscreen) {
+          containerRef.current.webkitRequestFullscreen();
+        } else if (containerRef.current.mozRequestFullScreen) {
+          containerRef.current.mozRequestFullScreen();
+        } else if (containerRef.current.msRequestFullscreen) {
+          containerRef.current.msRequestFullscreen();
+        }
+      } else {
+        // Exit fullscreen
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        } else if (document.mozCancelFullScreen) {
+          document.mozCancelFullScreen();
+        } else if (document.msExitFullscreen) {
+          document.msExitFullscreen();
+        }
+      }
+    } catch (error) {
+      console.error("Fullscreen error:", error);
+    }
+  };
+
   if (!isMobile) {
     return (
       <div className="min-h-screen bg-gray-900 flex flex-col items-center justify-center text-white p-6">
@@ -125,7 +178,7 @@ const VRVideoPlayer = () => {
   const showAttendanceButton = classData && !hasMarkedPresent;
 
   return (
-    <div className="relative w-screen h-screen bg-black">
+    <div ref={containerRef} className="relative w-screen h-screen bg-black">
       {!isLandscape && (
         <div className="absolute inset-0 bg-gray-900 flex flex-col items-center justify-center text-white p-6 z-10">
           <div className="animate-pulse mb-4">
@@ -188,6 +241,23 @@ const VRVideoPlayer = () => {
                   <>
                     <Play className="w-4 h-4" />
                     <span className="text-sm">Play</span>
+                  </>
+                )}
+              </button>
+
+              <button 
+                onClick={toggleFullscreen} 
+                className="flex items-center space-x-2 px-3 py-1 bg-purple-500 text-white rounded hover:bg-purple-600 transition-colors"
+              >
+                {isFullscreen ? (
+                  <>
+                    <Minimize className="w-4 h-4" />
+                    <span className="text-sm">Exit</span>
+                  </>
+                ) : (
+                  <>
+                    <Maximize className="w-4 h-4" />
+                    <span className="text-sm">Fullscreen</span>
                   </>
                 )}
               </button>
