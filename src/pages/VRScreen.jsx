@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Phone, Play, Pause, CheckCircle2, Loader2, Video, UserCheck } from 'lucide-react';
+import { Phone, Play, Pause, CheckCircle2, Loader2, UserCheck } from 'lucide-react';
 import axiosInstance from '../utils/axiosInstance';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../utils/AuthContext';
-import { useNavigate } from 'react-router-dom';
 
 const VRVideoPlayer = () => {
   const { classId } = useParams();
@@ -15,14 +14,13 @@ const VRVideoPlayer = () => {
   const [hasWatched, setHasWatched] = useState(false);
   const [hasMarkedPresent, setHasMarkedPresent] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [videoRef1] = useState(React.createRef());
-  const [videoRef2] = useState(React.createRef());
+  const [singleVideoRef] = useState(React.createRef());
   const [classData, setClassData] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     if(!token) {
-      navigate('/')
+      navigate('/');
     }
   }, [token, navigate]);
 
@@ -67,41 +65,31 @@ const VRVideoPlayer = () => {
       .finally(() => setIsLoading(false));
   }, [classId, token, id]);
 
-  // Set up video elements after they've been rendered and URL is available
+  // Set up video element after it's been rendered and URL is available
   useEffect(() => {
-    if (videoUrl && videoRef1.current && videoRef2.current) {
-      // Synchronize video loading and playback
-      const video1 = videoRef1.current;
-      const video2 = videoRef2.current;
+    if (videoUrl && singleVideoRef.current) {
+      const video = singleVideoRef.current;
       
-      // Function to handle video loading
       const handleVideoLoad = () => {
         if (isPlaying) {
-          video1.play().catch(err => console.error("Error playing video 1:", err));
-          video2.play().catch(err => console.error("Error playing video 2:", err));
+          video.play().catch(err => console.error("Error playing video:", err));
         }
       };
       
-      // Event listeners for load events
-      video1.addEventListener('loadeddata', handleVideoLoad);
-      video2.addEventListener('loadeddata', handleVideoLoad);
+      video.addEventListener('loadeddata', handleVideoLoad);
       
-      // Clean up event listeners
       return () => {
-        video1.removeEventListener('loadeddata', handleVideoLoad);
-        video2.removeEventListener('loadeddata', handleVideoLoad);
+        video.removeEventListener('loadeddata', handleVideoLoad);
       };
     }
-  }, [videoUrl, videoRef1, videoRef2, isPlaying]);
+  }, [videoUrl, singleVideoRef, isPlaying]);
 
   const handlePlayPause = () => {
-    if (videoRef1.current && videoRef2.current) {
+    if (singleVideoRef.current) {
       if (isPlaying) {
-        videoRef1.current.pause();
-        videoRef2.current.pause();
+        singleVideoRef.current.pause();
       } else {
-        videoRef1.current.play().catch(err => console.error("Error playing video 1:", err));
-        videoRef2.current.play().catch(err => console.error("Error playing video 2:", err));
+        singleVideoRef.current.play().catch(err => console.error("Error playing video:", err));
       }
       setIsPlaying(!isPlaying);
     }
@@ -172,32 +160,47 @@ const VRVideoPlayer = () => {
       
       {videoUrl && (
         <>
-          <div className={`w-full h-full flex ${!isLandscape ? 'opacity-0' : 'opacity-100'}`}>
-            <div className="w-1/2 h-full relative overflow-hidden">
-              <video
-                ref={videoRef1}
-                src={videoUrl}
-                className="absolute w-[200%] h-full object-cover"
-                style={{ left: '0%' }}
-                autoPlay
-                playsInline
-                muted
-                onEnded={handleVideoEnded}
-              />
+          {/* Single video that will be duplicated with CSS for VR effect */}
+          <div className={`absolute inset-0 ${!isLandscape ? 'opacity-0' : 'opacity-100'}`}>
+            <video
+              ref={singleVideoRef}
+              src={videoUrl}
+              className="hidden"
+              autoPlay
+              playsInline
+              muted
+              loop={false}
+              onEnded={handleVideoEnded}
+            />
+            
+            {/* VR Container */}
+            <div className="w-full h-full flex">
+              {/* Left eye */}
+              <div className="w-1/2 h-full overflow-hidden relative" style={{ backgroundColor: 'black' }}>
+                <div 
+                  className="absolute inset-0 bg-center bg-cover bg-no-repeat w-full h-full transform-gpu"
+                  style={{ 
+                    backgroundImage: `url('${videoUrl}')`,
+                    backgroundSize: '200% 100%',
+                    backgroundPosition: 'left center'
+                  }}
+                ></div>
+              </div>
+              
+              {/* Right eye */}
+              <div className="w-1/2 h-full overflow-hidden relative" style={{ backgroundColor: 'black' }}>
+                <div 
+                  className="absolute inset-0 bg-center bg-cover bg-no-repeat w-full h-full transform-gpu"
+                  style={{ 
+                    backgroundImage: `url('${videoUrl}')`,
+                    backgroundSize: '200% 100%',
+                    backgroundPosition: 'right center'
+                  }}
+                ></div>
+              </div>
             </div>
             
-            <div className="w-1/2 h-full relative overflow-hidden">
-              <video
-                ref={videoRef2}
-                src={videoUrl}
-                className="absolute w-[200%] h-full object-cover"
-                style={{ left: '-100%' }}
-                autoPlay
-                playsInline
-                muted
-              />
-            </div>
-            
+            {/* Center divider */}
             {isLandscape && (
               <div className="absolute inset-0 pointer-events-none">
                 <div className="h-full w-px bg-white bg-opacity-20 mx-auto" />
