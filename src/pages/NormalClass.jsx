@@ -36,7 +36,7 @@ const NormalClass = () => {
       })
       .then((response) => {
         setClassData(response.data);
-        setVideoUrl(`http://localhost:5000${response.data.class_video_url}`);
+        setVideoUrl(`https://immsense-server-production.up.railway.app/${response.data.class_video_url}`);
       })
       .catch((error) => console.error("Error fetching class video:", error))
       .finally(() => setIsLoading(false));
@@ -92,14 +92,16 @@ const NormalClass = () => {
         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
           <div className="relative">
             <div className="aspect-video bg-black rounded-t-lg overflow-hidden">
-              <video
-                ref={videoRef}
-                src={videoUrl}
-                className="w-full h-full"
-                autoPlay
-                playsInline
-                onEnded={handleVideoEnded}
-              />
+            <video
+  ref={videoRef}
+  src={videoUrl}
+  className="w-full h-full"
+  autoPlay
+  playsInline
+  muted  // Mute the video for autoplay to work on mobile
+  onEnded={handleVideoEnded}
+/>
+
             </div>
             
             <div className="absolute top-4 right-4 bg-black bg-opacity-50 rounded-full px-3 py-1 flex items-center space-x-2">
