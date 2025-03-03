@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Phone, Play, Pause, CheckCircle2, Loader2, UserCheck, Maximize, Minimize } from 'lucide-react';
+import { Phone, Play, Pause, CheckCircle2, Loader2, UserCheck, Maximize, Minimize, X } from 'lucide-react';
 import axiosInstance from '../utils/axiosInstance';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../utils/AuthContext';
@@ -17,7 +17,7 @@ const VRVideoPlayer = () => {
   const [classData, setClassData] = useState(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const containerRef = useRef(null);
-  const videoContainerRef = useRef(null); // New ref for the video container only
+  const videoContainerRef = useRef(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -123,7 +123,6 @@ const VRVideoPlayer = () => {
   };
 
   const toggleFullscreen = () => {
-    // Use videoContainerRef instead of containerRef to focus on just the videos
     if (!videoContainerRef.current) return;
     
     try {
@@ -185,7 +184,7 @@ const VRVideoPlayer = () => {
   const showAttendanceButton = classData && !hasMarkedPresent;
 
   return (
-    <div ref={containerRef} className="relative w-screen h-screen bg-black">
+    <div ref={containerRef} className="relative w-screen h-screen bg-black overflow-hidden">
       {!isLandscape && (
         <div className="absolute inset-0 bg-gray-900 flex flex-col items-center justify-center text-white p-6 z-10">
           <div className="animate-pulse mb-4">
@@ -243,9 +242,27 @@ const VRVideoPlayer = () => {
                 <div className="h-full w-px bg-white bg-opacity-20 mx-auto" />
               </div>
             )}
+
+            {/* Always-visible exit button in fullscreen mode */}
+            {isFullscreen && isLandscape && (
+              <button 
+                onClick={toggleFullscreen}
+                className="absolute top-4 right-4 z-50 flex items-center justify-center w-12 h-12 bg-red-600 text-white rounded-full shadow-lg hover:bg-red-700 transition-colors"
+                style={{ opacity: 0.9 }}
+              >
+                <X size={24} />
+              </button>
+            )}
           </div>
 
-          <div className={`absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20 ${!isLandscape ? 'opacity-0' : 'opacity-100'}`}>
+          {/* Controls bar */}
+          <div 
+            className={`absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20 ${!isLandscape ? 'opacity-0' : 'opacity-100'} ${isFullscreen ? 'fullscreen-controls' : ''}`}
+            style={{ 
+              transition: 'opacity 0.3s',
+              opacity: isFullscreen ? 0.9 : 1
+            }}
+          >
             <div className="flex items-center space-x-4 bg-black bg-opacity-50 rounded-lg p-2">
               <button 
                 onClick={handlePlayPause}
@@ -302,6 +319,21 @@ const VRVideoPlayer = () => {
               ) : null}
             </div>
           </div>
+
+          {/* Add a style tag for fullscreen-specific styles */}
+          <style jsx>{`
+            @media screen and (display-mode: fullscreen) {
+              .fullscreen-controls {
+                bottom: 20px;
+                opacity: 0.9 !important;
+              }
+              
+              /* Show controls on hover */
+              .fullscreen-controls:hover {
+                opacity: 1 !important;
+              }
+            }
+          `}</style>
         </>
       )}
     </div>
