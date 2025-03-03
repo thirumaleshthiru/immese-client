@@ -28,7 +28,12 @@ const VRVideoPlayer = () => {
 
   useEffect(() => {
     const checkOrientation = () => {
-      setIsLandscape(window.orientation === 90 || window.orientation === -90);
+      // For mobile browsers that don't support window.orientation
+      if (window.orientation !== undefined) {
+        setIsLandscape(window.orientation === 90 || window.orientation === -90);
+      } else {
+        setIsLandscape(window.innerWidth > window.innerHeight);
+      }
       setIsMobile(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
     };
 
@@ -62,14 +67,41 @@ const VRVideoPlayer = () => {
       .finally(() => setIsLoading(false));
   }, [classId, token, id]);
 
+  // Set up video elements after they've been rendered and URL is available
+  useEffect(() => {
+    if (videoUrl && videoRef1.current && videoRef2.current) {
+      // Synchronize video loading and playback
+      const video1 = videoRef1.current;
+      const video2 = videoRef2.current;
+      
+      // Function to handle video loading
+      const handleVideoLoad = () => {
+        if (isPlaying) {
+          video1.play().catch(err => console.error("Error playing video 1:", err));
+          video2.play().catch(err => console.error("Error playing video 2:", err));
+        }
+      };
+      
+      // Event listeners for load events
+      video1.addEventListener('loadeddata', handleVideoLoad);
+      video2.addEventListener('loadeddata', handleVideoLoad);
+      
+      // Clean up event listeners
+      return () => {
+        video1.removeEventListener('loadeddata', handleVideoLoad);
+        video2.removeEventListener('loadeddata', handleVideoLoad);
+      };
+    }
+  }, [videoUrl, videoRef1, videoRef2, isPlaying]);
+
   const handlePlayPause = () => {
     if (videoRef1.current && videoRef2.current) {
       if (isPlaying) {
         videoRef1.current.pause();
         videoRef2.current.pause();
       } else {
-        videoRef1.current.play();
-        videoRef2.current.play();
+        videoRef1.current.play().catch(err => console.error("Error playing video 1:", err));
+        videoRef2.current.play().catch(err => console.error("Error playing video 2:", err));
       }
       setIsPlaying(!isPlaying);
     }
@@ -149,7 +181,6 @@ const VRVideoPlayer = () => {
                 style={{ left: '0%' }}
                 autoPlay
                 playsInline
-                loop
                 muted
                 onEnded={handleVideoEnded}
               />
@@ -163,7 +194,6 @@ const VRVideoPlayer = () => {
                 style={{ left: '-100%' }}
                 autoPlay
                 playsInline
-                loop
                 muted
               />
             </div>
