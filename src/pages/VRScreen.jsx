@@ -14,7 +14,6 @@ const VRVideoPlayer = () => {
   const [hasWatched, setHasWatched] = useState(false);
   const [hasMarkedPresent, setHasMarkedPresent] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [singleVideoRef] = useState(React.createRef());
   const [classData, setClassData] = useState(null);
   const navigate = useNavigate();
 
@@ -65,34 +64,17 @@ const VRVideoPlayer = () => {
       .finally(() => setIsLoading(false));
   }, [classId, token, id]);
 
-  // Set up video element after it's been rendered and URL is available
-  useEffect(() => {
-    if (videoUrl && singleVideoRef.current) {
-      const video = singleVideoRef.current;
-      
-      const handleVideoLoad = () => {
-        if (isPlaying) {
-          video.play().catch(err => console.error("Error playing video:", err));
-        }
-      };
-      
-      video.addEventListener('loadeddata', handleVideoLoad);
-      
-      return () => {
-        video.removeEventListener('loadeddata', handleVideoLoad);
-      };
-    }
-  }, [videoUrl, singleVideoRef, isPlaying]);
-
   const handlePlayPause = () => {
-    if (singleVideoRef.current) {
+    // Control all videos on the page
+    const videos = document.querySelectorAll('video');
+    videos.forEach(video => {
       if (isPlaying) {
-        singleVideoRef.current.pause();
+        video.pause();
       } else {
-        singleVideoRef.current.play().catch(err => console.error("Error playing video:", err));
+        video.play().catch(err => console.error("Error playing video:", err));
       }
-      setIsPlaying(!isPlaying);
-    }
+    });
+    setIsPlaying(!isPlaying);
   };
 
   const handleVideoEnded = () => {
@@ -105,9 +87,7 @@ const VRVideoPlayer = () => {
       axiosInstance
         .post('/student/attendance', {
           student_id: id,
-          class_id: classId,
-          class_start_time: classData.class_start_time,
-          class_end_time: classData.class_end_time
+          class_id: classId
         }, {
           headers: { Authorization: `Bearer ${token}` }
         })
@@ -160,44 +140,29 @@ const VRVideoPlayer = () => {
       
       {videoUrl && (
         <>
-          {/* Single video that will be duplicated with CSS for VR effect */}
-          <div className={`absolute inset-0 ${!isLandscape ? 'opacity-0' : 'opacity-100'}`}>
-            <video
-              ref={singleVideoRef}
-              src={videoUrl}
-              className="hidden"
-              autoPlay
-              playsInline
-              muted
-              loop={false}
-              onEnded={handleVideoEnded}
-            />
+          {/* Simple VR Container with two identical videos */}
+          <div className={`w-full h-full flex ${!isLandscape ? 'opacity-0' : 'opacity-100'}`}>
+            {/* Left side video */}
+            <div className="w-1/2 h-full overflow-hidden">
+              <video
+                src={videoUrl}
+                className="w-full h-full object-contain"
+                autoPlay
+                playsInline
+                muted
+                onEnded={handleVideoEnded}
+              />
+            </div>
             
-            {/* VR Container */}
-            <div className="w-full h-full flex">
-              {/* Left eye */}
-              <div className="w-1/2 h-full overflow-hidden relative" style={{ backgroundColor: 'black' }}>
-                <div 
-                  className="absolute inset-0 bg-center bg-cover bg-no-repeat w-full h-full transform-gpu"
-                  style={{ 
-                    backgroundImage: `url('${videoUrl}')`,
-                    backgroundSize: '200% 100%',
-                    backgroundPosition: 'left center'
-                  }}
-                ></div>
-              </div>
-              
-              {/* Right eye */}
-              <div className="w-1/2 h-full overflow-hidden relative" style={{ backgroundColor: 'black' }}>
-                <div 
-                  className="absolute inset-0 bg-center bg-cover bg-no-repeat w-full h-full transform-gpu"
-                  style={{ 
-                    backgroundImage: `url('${videoUrl}')`,
-                    backgroundSize: '200% 100%',
-                    backgroundPosition: 'right center'
-                  }}
-                ></div>
-              </div>
+            {/* Right side video - exact same video */}
+            <div className="w-1/2 h-full overflow-hidden">
+              <video
+                src={videoUrl}
+                className="w-full h-full object-contain"
+                autoPlay
+                playsInline
+                muted
+              />
             </div>
             
             {/* Center divider */}

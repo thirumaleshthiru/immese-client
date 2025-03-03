@@ -33,16 +33,60 @@ const StudentLogin = () => {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-violet-100">
-      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-        <h2 className="text-2xl font-bold text-center text-violet-700 mb-4">Student Login</h2>
-        {error && <p className="text-red-500 text-center">{error}</p>}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input type="text" name="student_rollno" placeholder="Roll Number" value={formData.student_rollno} onChange={handleChange} className="input input-bordered w-full" required />
-          <input type="password" name="password" placeholder="Password" value={formData.password} onChange={handleChange} className="input input-bordered w-full" required />
-          <button type="submit" className="btn btn-primary w-full">Login</button>
+    <div className="min-h-screen flex items-center justify-center bg-white p-4">
+      <div className="w-full max-w-md border border-gray-200 p-8">
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold text-gray-800 mb-1">Welcome Back</h2>
+          <p className="text-gray-500">Login to your student account</p>
+        </div>
+        
+        {error && (
+          <div className="mb-6 text-pink-600 text-sm">
+            {error}
+          </div>
+        )}
+        
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div>
+            <input 
+              type="text" 
+              name="student_rollno" 
+              placeholder="Roll Number" 
+              value={formData.student_rollno} 
+              onChange={handleChange} 
+              className="w-full p-3 border-0 border-b border-gray-300 focus:border-purple-500 focus:ring-0 text-gray-800" 
+              required 
+            />
+          </div>
+          
+          <div>
+            <input 
+              type="password" 
+              name="password" 
+              placeholder="Password" 
+              value={formData.password} 
+              onChange={handleChange} 
+              className="w-full p-3 border-0 border-b border-gray-300 focus:border-purple-500 focus:ring-0 text-gray-800" 
+              required 
+            />
+          </div>
+          
+          <button 
+            type="submit" 
+            className="w-full py-4 mt-6 bg-purple-600 hover:bg-purple-700 text-white font-medium"
+          >
+            Login
+          </button>
         </form>
-        <p className="text-center mt-4">Don't have an account? <a href="/studentregister" className="text-violet-700 hover:underline">Register</a></p>
+        
+        <div className="mt-8 text-center">
+          <p className="text-gray-500">
+            Don't have an account?{" "}
+            <a href="/studentregister" className="text-purple-600 font-medium">
+              Register
+            </a>
+          </p>
+        </div>
       </div>
     </div>
   );
