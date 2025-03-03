@@ -26,14 +26,14 @@ const StudentRegister = () => {
     try {
       const response = await axiosInstance.post("/auth/student/register", formData);
       if (response.status === 201) {
-        alert("Student Registered Successful!")
+        alert("Student Registered Successfully!");
         navigate("/studentlogin");
       }
     } catch (err) {
-      setError("Registration failed. Please try again.",err);
+      setError(err.response?.data?.error || "Registration failed. Please try again.");
     }
   };
-
+  
   return (
     <div className="flex justify-center items-center min-h-screen bg-violet-100">
       <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
