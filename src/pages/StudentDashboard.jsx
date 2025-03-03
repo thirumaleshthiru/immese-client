@@ -16,7 +16,7 @@ const StudentDashboard = () => {
   })
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 p-8">
+    <div className="min-h-screen  p-8">
       <div className="max-w-6xl mx-auto">
         <div className="mb-12 space-y-2">
           <h1 className="text-4xl font-bold text-indigo-900">

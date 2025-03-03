@@ -17,7 +17,7 @@ const VRVideoPlayer = () => {
   const [classData, setClassData] = useState(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const containerRef = useRef(null);
-  const videoRef = useRef(null);
+  const videoContainerRef = useRef(null); // New ref for the video container only
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -28,6 +28,7 @@ const VRVideoPlayer = () => {
 
   useEffect(() => {
     const checkOrientation = () => {
+      // For mobile browsers that don't support window.orientation
       if (window.orientation !== undefined) {
         setIsLandscape(window.orientation === 90 || window.orientation === -90);
       } else {
@@ -40,14 +41,14 @@ const VRVideoPlayer = () => {
     window.addEventListener('orientationchange', checkOrientation);
     window.addEventListener('resize', checkOrientation);
 
+    // Track fullscreen changes
     const handleFullscreenChange = () => {
-      const fullscreenElement = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
-      setIsFullscreen(!!fullscreenElement);
-      if (fullscreenElement) {
-        videoRef.current.play().catch(err => console.error("Error playing video:", err));
-      } else {
-        videoRef.current.pause();
-      }
+      setIsFullscreen(
+        document.fullscreenElement || 
+        document.webkitFullscreenElement || 
+        document.mozFullScreenElement || 
+        document.msFullscreenElement
+      );
     };
     
     document.addEventListener('fullscreenchange', handleFullscreenChange);
@@ -86,11 +87,15 @@ const VRVideoPlayer = () => {
   }, [classId, token, id]);
 
   const handlePlayPause = () => {
-    if (isPlaying) {
-      videoRef.current.pause();
-    } else {
-      videoRef.current.play().catch(err => console.error("Error playing video:", err));
-    }
+    // Control all videos on the page
+    const videos = document.querySelectorAll('video');
+    videos.forEach(video => {
+      if (isPlaying) {
+        video.pause();
+      } else {
+        video.play().catch(err => console.error("Error playing video:", err));
+      }
+    });
     setIsPlaying(!isPlaying);
   };
 
@@ -118,20 +123,28 @@ const VRVideoPlayer = () => {
   };
 
   const toggleFullscreen = () => {
-    if (!containerRef.current) return;
+    // Use videoContainerRef instead of containerRef to focus on just the videos
+    if (!videoContainerRef.current) return;
     
     try {
       if (!isFullscreen) {
-        if (containerRef.current.requestFullscreen) {
-          containerRef.current.requestFullscreen();
-        } else if (containerRef.current.webkitRequestFullscreen) {
-          containerRef.current.webkitRequestFullscreen();
-        } else if (containerRef.current.mozRequestFullScreen) {
-          containerRef.current.mozRequestFullScreen();
-        } else if (containerRef.current.msRequestFullscreen) {
-          containerRef.current.msRequestFullscreen();
+        // Enter fullscreen with options to hide browser UI
+        if (videoContainerRef.current.requestFullscreen) {
+          videoContainerRef.current.requestFullscreen({ navigationUI: "hide" });
+        } else if (videoContainerRef.current.webkitRequestFullscreen) {
+          // Safari/iOS specific
+          videoContainerRef.current.webkitRequestFullscreen({ navigationUI: "hide" });
+          // For older iOS Safari versions
+          if (document.body.webkitEnterFullscreen) {
+            document.body.webkitEnterFullscreen();
+          }
+        } else if (videoContainerRef.current.mozRequestFullScreen) {
+          videoContainerRef.current.mozRequestFullScreen({ navigationUI: "hide" });
+        } else if (videoContainerRef.current.msRequestFullscreen) {
+          videoContainerRef.current.msRequestFullscreen({ navigationUI: "hide" });
         }
       } else {
+        // Exit fullscreen
         if (document.exitFullscreen) {
           document.exitFullscreen();
         } else if (document.webkitExitFullscreen) {
@@ -187,29 +200,44 @@ const VRVideoPlayer = () => {
       
       {videoUrl && (
         <>
-          <div className={`w-full h-full flex ${!isLandscape ? 'opacity-0' : 'opacity-100'}`}>
+          {/* Simple VR Container with two identical videos */}
+          <div 
+            ref={videoContainerRef}
+            className={`w-full h-full flex ${!isLandscape ? 'opacity-0' : 'opacity-100'}`}
+            style={{
+              background: '#000',
+              position: isFullscreen ? 'absolute' : 'relative',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              zIndex: 5
+            }}
+          >
+            {/* Left side video */}
             <div className="w-1/2 h-full overflow-hidden">
               <video
-                ref={videoRef}
                 src={videoUrl}
                 className="w-full h-full object-contain"
-                autoPlay={isFullscreen}
+                autoPlay
                 playsInline
                 muted
                 onEnded={handleVideoEnded}
               />
             </div>
             
+            {/* Right side video - exact same video */}
             <div className="w-1/2 h-full overflow-hidden">
               <video
                 src={videoUrl}
                 className="w-full h-full object-contain"
-                autoPlay={isFullscreen}
+                autoPlay
                 playsInline
                 muted
               />
             </div>
             
+            {/* Center divider */}
             {isLandscape && (
               <div className="absolute inset-0 pointer-events-none">
                 <div className="h-full w-px bg-white bg-opacity-20 mx-auto" />
@@ -217,65 +245,63 @@ const VRVideoPlayer = () => {
             )}
           </div>
 
-          {isFullscreen && (
-            <div className={`absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20 ${!isLandscape ? 'opacity-0' : 'opacity-100'}`}>
-              <div className="flex items-center space-x-4 bg-black bg-opacity-50 rounded-lg p-2">
-                <button 
-                  onClick={handlePlayPause}
-                  className="flex items-center space-x-2 px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-                >
-                  {isPlaying ? (
-                    <>
-                      <Pause className="w-4 h-4" />
-                      <span className="text-sm">Pause</span>
-                    </>
-                  ) : (
-                    <>
-                      <Play className="w-4 h-4" />
-                      <span className="text-sm">Play</span>
-                    </>
-                  )}
-                </button>
+          <div className={`absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20 ${!isLandscape ? 'opacity-0' : 'opacity-100'}`}>
+            <div className="flex items-center space-x-4 bg-black bg-opacity-50 rounded-lg p-2">
+              <button 
+                onClick={handlePlayPause}
+                className="flex items-center space-x-2 px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+              >
+                {isPlaying ? (
+                  <>
+                    <Pause className="w-4 h-4" />
+                    <span className="text-sm">Pause</span>
+                  </>
+                ) : (
+                  <>
+                    <Play className="w-4 h-4" />
+                    <span className="text-sm">Play</span>
+                  </>
+                )}
+              </button>
 
-                <button 
-                  onClick={toggleFullscreen} 
-                  className="flex items-center space-x-2 px-3 py-1 bg-purple-500 text-white rounded hover:bg-purple-600 transition-colors"
-                >
-                  {isFullscreen ? (
-                    <>
-                      <Minimize className="w-4 h-4" />
-                      <span className="text-sm">Exit</span>
-                    </>
-                  ) : (
-                    <>
-                      <Maximize className="w-4 h-4" />
-                      <span className="text-sm">Fullscreen</span>
-                    </>
-                  )}
-                </button>
+              <button 
+                onClick={toggleFullscreen} 
+                className="flex items-center space-x-2 px-3 py-1 bg-purple-500 text-white rounded hover:bg-purple-600 transition-colors"
+              >
+                {isFullscreen ? (
+                  <>
+                    <Minimize className="w-4 h-4" />
+                    <span className="text-sm">Exit</span>
+                  </>
+                ) : (
+                  <>
+                    <Maximize className="w-4 h-4" />
+                    <span className="text-sm">Fullscreen</span>
+                  </>
+                )}
+              </button>
 
-                {hasMarkedPresent ? (
-                  <div className="flex items-center space-x-2 px-3 py-1 bg-green-600 text-white rounded">
-                    <CheckCircle2 className="w-4 h-4" />
-                    <span className="text-sm">Present</span>
-                  </div>
-                ) : showAttendanceButton ? (
-                  <button
-                    onClick={markAttendance}
-                    disabled={!hasWatched}
-                    className={`flex items-center space-x-2 px-3 py-1 rounded transition-colors ${
-                      hasWatched 
-                        ? 'bg-green-500 text-white hover:bg-green-600' 
-                        : 'bg-gray-500 bg-opacity-50 text-gray-300 cursor-not-allowed'
-                    }`}
-                  >
-                    <UserCheck className="w-4 h-4" />
-                    <span className="text-sm">Present</span>
-                  </button>
-                ) : null}
-              </div>
+              {hasMarkedPresent ? (
+                <div className="flex items-center space-x-2 px-3 py-1 bg-green-600 text-white rounded">
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span className="text-sm">Present</span>
+                </div>
+              ) : showAttendanceButton ? (
+                <button
+                  onClick={markAttendance}
+                  disabled={!hasWatched}
+                  className={`flex items-center space-x-2 px-3 py-1 rounded transition-colors ${
+                    hasWatched 
+                      ? 'bg-green-500 text-white hover:bg-green-600' 
+                      : 'bg-gray-500 bg-opacity-50 text-gray-300 cursor-not-allowed'
+                  }`}
+                >
+                  <UserCheck className="w-4 h-4" />
+                  <span className="text-sm">Present</span>
+                </button>
+              ) : null}
             </div>
-          )}
+          </div>
         </>
       )}
     </div>
