@@ -98,7 +98,7 @@ const NormalClass = () => {
   className="w-full h-full"
   autoPlay
   playsInline
-  muted  // Mute the video for autoplay to work on mobile
+  // Mute the video for autoplay to work on mobile
   onEnded={handleVideoEnded}
 />
 
