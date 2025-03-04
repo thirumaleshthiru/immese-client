@@ -220,11 +220,7 @@ const VRVideoPlayer = () => {
                 className="w-full h-full object-contain"
                 autoPlay
                 playsInline
-<<<<<<< HEAD
-                 
-=======
                
->>>>>>> 2339c33ec0fcc80cd9f82de011705671ac8a7162
                 onEnded={handleVideoEnded}
               />
             </div>
@@ -235,13 +231,10 @@ const VRVideoPlayer = () => {
                 src={videoUrl}
                 className="w-full h-full object-contain"
                 autoPlay
-                playsInline
-<<<<<<< HEAD
+                playsInline 
                />
-=======
-                
-              />
->>>>>>> 2339c33ec0fcc80cd9f82de011705671ac8a7162
+ 
+ 
             </div>
             
             {/* Center divider */}

@@ -92,19 +92,17 @@ const NormalClass = () => {
         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
           <div className="relative">
             <div className="aspect-video bg-black rounded-t-lg overflow-hidden">
-            <video
-  ref={videoRef}
-  src={videoUrl}
-  className="w-full h-full"
-  autoPlay
-  playsInline
-<<<<<<< HEAD
-   onEnded={handleVideoEnded}
-=======
-  // Mute the video for autoplay to work on mobile
-  onEnded={handleVideoEnded}
->>>>>>> 2339c33ec0fcc80cd9f82de011705671ac8a7162
-/>
+              <video
+              ref={videoRef}
+              src={videoUrl}
+              className="w-full h-full"
+              autoPlay
+              playsInline
+
+              onEnded={handleVideoEnded}
+
+              /> 
+ 
 
             </div>
             
