@@ -213,31 +213,28 @@ const VRVideoPlayer = () => {
               zIndex: 5
             }}
           >
-            {/* Left side video */}
-            <div className="w-1/2 h-full overflow-hidden">
-              <video
-                src={videoUrl}
-                className="w-full h-full object-contain"
-                autoPlay
-                playsInline
-               
-                onEnded={handleVideoEnded}
-              />
-            </div>
-            
-            {/* Right side video - exact same video */}
-            <div className="w-1/2 h-full overflow-hidden">
-              <video
-                src={videoUrl}
-                className="w-full h-full object-contain"
-                autoPlay
-                 playsInline 
-                 muted
-               />
- 
- 
-            </div>
-            
+       
+       {/* Left side video */}
+<div className="w-1/2 h-full overflow-hidden">
+  <video
+    src={videoUrl}
+    className="w-full h-full object-contain"
+    autoPlay
+    playsInline
+    onEnded={handleVideoEnded}
+  />
+</div>
+
+{/* Right side video - muted */}
+<div className="w-1/2 h-full overflow-hidden">
+  <video
+    src={videoUrl}
+    className="w-full h-full object-contain"
+    autoPlay
+    playsInline
+    muted // Mute the right-side video
+  />
+</div>
             {/* Center divider */}
             {isLandscape && (
               <div className="absolute inset-0 pointer-events-none">
