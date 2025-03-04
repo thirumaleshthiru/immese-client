@@ -36,7 +36,7 @@ const NormalClass = () => {
       })
       .then((response) => {
         setClassData(response.data);
-        setVideoUrl(`https://immsense-server-production.up.railway.app${response.data.class_video_url}`);
+         setVideoUrl(`https://immsense-server-production.up.railway.app${response.data.class_video_url}`);
       })
       .catch((error) => console.error("Error fetching class video:", error))
       .finally(() => setIsLoading(false));
