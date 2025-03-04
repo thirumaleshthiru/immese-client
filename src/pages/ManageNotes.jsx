@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axiosInstance from "../utils/axiosInstance";
+import axios from "axios";
 import { useAuth } from "../utils/AuthContext";
 import { Trash2, Download, FileText, Shield } from "lucide-react";
 import { useParams, useNavigate } from "react-router-dom";
@@ -21,7 +21,7 @@ const ManageNotes = () => {
   useEffect(() => {
     const fetchNotes = async () => {
       try {
-        const response = await axiosInstance.get(`/notes/class/${class_id}`, {
+        const response = await axios.get(`https://immsense-server-production.up.railway.app/notes/class/${class_id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setNotes(response.data);
@@ -36,7 +36,7 @@ const ManageNotes = () => {
 
   const handleDelete = async (noteId) => {
     try {
-      await axiosInstance.delete(`/teacher/notes/delete/${noteId}`, {
+      await axios.delete(`https://immsense-server-production.up.railway.app/teacher/notes/delete/${noteId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setNotes(notes.filter((note) => note.note_id !== noteId));
@@ -102,7 +102,7 @@ const ManageNotes = () => {
                       
                       <div className="flex space-x-2">
                         <a
-                          href={note.notes_url}
+                          href={`https://immsense-server-production.up.railway.app${note.notes_url}`}
                           download
                           className="bg-blue-600 text-white p-2 rounded-full hover:bg-blue-500 transition transform hover:scale-110 shadow-lg"
                         >
@@ -141,15 +141,7 @@ const ManageNotes = () => {
           </div>
         </div>
         
-        <div className="mt-6 flex justify-center">
-          <button 
-            onClick={() => navigate(`/class/${class_id}`)}
-            className="px-6 py-3 bg-blue-800 bg-opacity-50 text-white rounded-full flex items-center hover:bg-blue-700 transition transform hover:scale-105 shadow-lg backdrop-blur-sm border border-blue-500 border-opacity-30"
-          >
-            <Shield className="w-5 h-5 mr-2" />
-            Back to Class
-          </button>
-        </div>
+      
       </div>
     </div>
   );

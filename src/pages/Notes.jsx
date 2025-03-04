@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axiosInstance from "../utils/axiosInstance";
+import axios from "axios";
 import { useAuth } from "../utils/AuthContext";
 import { Trash2, Download, FileText, ChevronLeft } from "lucide-react";
 import { useParams, useNavigate } from "react-router-dom";
@@ -21,7 +21,7 @@ const ManageNotes = () => {
   useEffect(() => {
     const fetchNotes = async () => {
       try {
-        const response = await axiosInstance.get(`/notes/class/${class_id}`, {
+        const response = await axios.get(`https://immsense-server-production.up.railway.app/notes/class/${class_id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setNotes(response.data);
@@ -37,7 +37,7 @@ const ManageNotes = () => {
   const handleDelete = async (noteId) => {
     if (!window.confirm("Are you sure you want to delete this note?")) return;
     try {
-      await axiosInstance.delete(`/teacher/notes/delete/${noteId}`, {
+      await axios.delete(`https://immsense-server-production.up.railway.app/teacher/notes/delete/${noteId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setNotes(notes.filter((note) => note.note_id !== noteId));
@@ -141,14 +141,17 @@ const ManageNotes = () => {
                       </div>
                       
                       <div className="flex space-x-2">
-                        <a
-                          href={note.notes_url}
+                          <a
+                          href={`https://immsense-server-production.up.railway.app${note.notes_url}`}
                           download
+                          target="_blank"
+                          rel="noopener noreferrer"
                           className="bg-indigo-600 text-white p-2 rounded-full hover:bg-indigo-700 transition transform hover:scale-110 shadow-lg"
                           onClick={(e) => e.stopPropagation()}
-                        >
-                          <Download className="w-5 h-5" />
-                        </a>
+                          >
+                          <Download className="h-4 w-4" />
+                          </a>
+
                       </div>
                     </div>
                   </div>
