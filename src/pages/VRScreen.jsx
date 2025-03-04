@@ -232,7 +232,7 @@ const VRVideoPlayer = () => {
                 className="w-full h-full object-contain"
                 autoPlay
                  playsInline 
-               
+                 muted
                />
  
  
