@@ -231,8 +231,8 @@ const VRVideoPlayer = () => {
                 src={videoUrl}
                 className="w-full h-full object-contain"
                 autoPlay
-                muted
-                playsInline 
+                 playsInline 
+               
                />
  
  
