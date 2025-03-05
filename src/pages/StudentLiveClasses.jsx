@@ -38,7 +38,7 @@ function StudentLiveClasses() {
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
           <h1 className="text-3xl md:text-4xl font-bold text-indigo-900 mb-4">
-            Live Classes
+            Latest Classes
           </h1>
           <p className="text-lg text-indigo-600">
             Join your interactive learning sessions
@@ -70,7 +70,7 @@ function StudentLiveClasses() {
                       </div>
                       <div className="flex items-center bg-green-100 px-3 py-1 rounded-full">
                         <Clock size={14} className="text-green-600 mr-1" />
-                        <span className="text-sm font-medium text-green-600">Live Now</span>
+                        <span className="text-sm font-medium text-green-600">Latest Now</span>
                       </div>
                     </div>
 
