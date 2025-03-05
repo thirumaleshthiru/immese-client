@@ -29,10 +29,10 @@ const StudentDashboard = () => {
 
         <div className="grid gap-8 md:grid-cols-3">
           <DashboardCard 
-            title="Live Classes" 
+            title="Latest Classes" 
             link="/liveclass"
             icon={<PlayCircle className="w-8 h-8 mb-4 text-indigo-600" />}
-            description="Join interactive live sessions with your instructors"
+            description="Join interactive latest sessions with your instructors"
           />
           <DashboardCard 
             title="Previous Classes" 
