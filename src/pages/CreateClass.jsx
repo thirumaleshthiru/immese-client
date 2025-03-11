@@ -1,17 +1,19 @@
-import { useState,useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../utils/AuthContext";
 import axiosInstance from "../utils/axiosInstance";
 import { motion } from "framer-motion";
 import { UploadCloud, Video } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+
 const CreateClass = () => {
   const { token, id } = useAuth();
   const navigate = useNavigate();
-    useEffect(()=>{
-      if(!token){
-        navigate('/')
-      }
-    })
+  useEffect(() => {
+    if (!token) {
+      navigate("/");
+    }
+  });
+  
   const [formData, setFormData] = useState({
     class_name: "",
     class_description: "",
@@ -159,7 +161,10 @@ const CreateClass = () => {
           <input type="text" name="class_name" placeholder="Class Name" className="input input-bordered w-full" value={formData.class_name} onChange={handleChange} required />
           <textarea name="class_description" placeholder="Class Description" className="textarea textarea-bordered w-full" value={formData.class_description} onChange={handleChange} required></textarea>
           
-          <div>
+          <div className="form-control">
+            <label className="label">
+              <span className="label-text">Start Date and Time</span>
+            </label>
             <input 
               type="datetime-local" 
               name="class_start_date" 
@@ -171,7 +176,10 @@ const CreateClass = () => {
             />
           </div>
 
-          <div>
+          <div className="form-control">
+            <label className="label">
+              <span className="label-text">End Date and Time</span>
+            </label>
             <input 
               type="datetime-local" 
               name="class_end_date" 
